@@ -5,6 +5,7 @@ package com.lucas.service.util;
  * @Date 2020/1/5 18:50
  * @Version 1.0
  */
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,6 +17,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.aspectj.util.FileUtil;
@@ -41,7 +43,7 @@ public class ZipUtil {
     public static void main(String[] args) {
         try {
 //            toZip(filePath, outPath,true);
-            unZipFiles(outPath,unZipPath);
+            unZipFiles(outPath, unZipPath);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,11 +52,12 @@ public class ZipUtil {
 
     /**
      * 压缩成ZIP
-     * @param srcDir         压缩 文件/文件夹 路径
-     * @param outPathFile    压缩 文件/文件夹 输出路径+文件名 D:/xx.zip
-     * @param isDelSrcFile   是否删除原文件: 压缩前文件
+     *
+     * @param srcDir       压缩 文件/文件夹 路径
+     * @param outPathFile  压缩 文件/文件夹 输出路径+文件名 D:/xx.zip
+     * @param isDelSrcFile 是否删除原文件: 压缩前文件
      */
-    public static void toZip(String srcDir, String outPathFile,boolean isDelSrcFile) throws Exception {
+    public static void toZip(String srcDir, String outPathFile, boolean isDelSrcFile) throws Exception {
         long start = System.currentTimeMillis();
         FileOutputStream out = null;
         ZipOutputStream zos = null;
@@ -62,31 +65,37 @@ public class ZipUtil {
             out = new FileOutputStream(new File(outPathFile));
             zos = new ZipOutputStream(out);
             File sourceFile = new File(srcDir);
-            if(!sourceFile.exists()){
+            if (!sourceFile.exists()) {
                 throw new Exception("需压缩文件或者文件夹不存在");
             }
             compress(sourceFile, zos, sourceFile.getName());
-            if(isDelSrcFile){
+            if (isDelSrcFile) {
                 delDir(srcDir);
 //                FileUtil.deleteContents()
             }
-            log.info("原文件:{}. 压缩到:{}完成. 是否删除原文件:{}. 耗时:{}ms. ",srcDir,outPathFile,isDelSrcFile,System.currentTimeMillis()-start);
+            log.info("原文件:{}. 压缩到:{}完成. 是否删除原文件:{}. 耗时:{}ms. ", srcDir, outPathFile, isDelSrcFile, System.currentTimeMillis() - start);
         } catch (Exception e) {
-            log.error("zip error from ZipUtils: {}. ",e.getMessage());
+            log.error("zip error from ZipUtils: {}. ", e.getMessage());
             throw new Exception("zip error from ZipUtils");
         } finally {
             try {
-                if (zos != null) {zos.close();}
-                if (out != null) {out.close();}
-            } catch (Exception e) {}
+                if (zos != null) {
+                    zos.close();
+                }
+                if (out != null) {
+                    out.close();
+                }
+            } catch (Exception e) {
+            }
         }
     }
 
     /**
      * 递归压缩方法
+     *
      * @param sourceFile 源文件
-     * @param zos zip输出流
-     * @param name 压缩后的名称
+     * @param zos        zip输出流
+     * @param name       压缩后的名称
      */
     private static void compress(File sourceFile, ZipOutputStream zos, String name)
             throws Exception {
@@ -122,14 +131,14 @@ public class ZipUtil {
     /**
      * 解压文件到指定目录
      */
-    @SuppressWarnings({ "rawtypes", "resource" })
+    @SuppressWarnings({"rawtypes", "resource"})
     public static void unZipFiles(String zipPath, String descDir) throws IOException {
-        log.info("文件:{}. 解压路径:{}. 解压开始.",zipPath,descDir);
+        log.info("文件:{}. 解压路径:{}. 解压开始.", zipPath, descDir);
         long start = System.currentTimeMillis();
-        try{
+        try {
             File zipFile = new File(zipPath);
             System.err.println(zipFile.getName());
-            if(!zipFile.exists()){
+            if (!zipFile.exists()) {
                 throw new IOException("需解压文件不存在.");
             }
             File pathFile = new File(descDir);
@@ -137,7 +146,7 @@ public class ZipUtil {
                 pathFile.mkdirs();
             }
             ZipFile zip = new ZipFile(zipFile, Charset.forName("GBK"));
-            for (Enumeration entries = zip.entries(); entries.hasMoreElements();) {
+            for (Enumeration entries = zip.entries(); entries.hasMoreElements(); ) {
                 ZipEntry entry = (ZipEntry) entries.nextElement();
                 String zipEntryName = entry.getName();
                 System.err.println(zipEntryName);
@@ -163,9 +172,9 @@ public class ZipUtil {
                 in.close();
                 out.close();
             }
-            log.info("文件:{}. 解压路径:{}. 解压完成. 耗时:{}ms. ",zipPath,descDir,System.currentTimeMillis()-start);
-        }catch(Exception e){
-            log.info("文件:{}. 解压路径:{}. 解压异常:{}. 耗时:{}ms. ",zipPath,descDir,e,System.currentTimeMillis()-start);
+            log.info("文件:{}. 解压路径:{}. 解压完成. 耗时:{}ms. ", zipPath, descDir, System.currentTimeMillis() - start);
+        } catch (Exception e) {
+            log.info("文件:{}. 解压路径:{}. 解压异常:{}. 耗时:{}ms. ", zipPath, descDir, e, System.currentTimeMillis() - start);
             throw new IOException(e);
 
         }
@@ -173,9 +182,9 @@ public class ZipUtil {
 
     // 删除文件或文件夹以及文件夹下所有文件
     public static void delDir(String dirPath) throws IOException {
-        log.info("删除文件开始:{}.",dirPath);
+        log.info("删除文件开始:{}.", dirPath);
         long start = System.currentTimeMillis();
-        try{
+        try {
             File dirFile = new File(dirPath);
             if (!dirFile.exists()) {
                 return;
@@ -185,17 +194,43 @@ public class ZipUtil {
                 return;
             }
             File[] files = dirFile.listFiles();
-            if(files==null){
+            if (files == null) {
                 return;
             }
             for (int i = 0; i < files.length; i++) {
                 delDir(files[i].toString());
             }
             dirFile.delete();
-            log.info("删除文件:{}. 耗时:{}ms. ",dirPath,System.currentTimeMillis()-start);
-        }catch(Exception e){
-            log.info("删除文件:{}. 异常:{}. 耗时:{}ms. ",dirPath,e,System.currentTimeMillis()-start);
+            log.info("删除文件:{}. 耗时:{}ms. ", dirPath, System.currentTimeMillis() - start);
+        } catch (Exception e) {
+            log.info("删除文件:{}. 异常:{}. 耗时:{}ms. ", dirPath, e, System.currentTimeMillis() - start);
             throw new IOException("删除文件异常.");
+        }
+    }
+
+    public static void extZipFile(String zipFileName, String extPlace) {
+        try {
+            FileInputStream is = new FileInputStream(new File(zipFileName));
+            ZipInputStream zipIs = new ZipInputStream(is);
+            ZipEntry entry = null;
+            while ((entry = zipIs.getNextEntry()) != null) {
+                String entryName = entry.getName();
+                System.out.println("entryName= " + entryName);
+                if (entry.isDirectory()) {
+                    File file = new File(extPlace + entryName);
+                    file.mkdirs();
+                } else {
+                    FileOutputStream os = new FileOutputStream(extPlace + entryName);
+                    // Transfer bytes from the ZIP file to the output file
+                    byte[] buf = new byte[2048];
+                    int len;
+                    while ((len = zipIs.read(buf)) > 0) {
+                        os.write(buf, 0, len);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
