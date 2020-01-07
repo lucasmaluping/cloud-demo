@@ -1,0 +1,37 @@
+server:
+  port: 8084
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/frame?characterEncoding=utf-8&serverTimezone=UTC
+    username: root
+    password: lucas
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  thymeleaf:
+    cache: false
+  application:
+    name: user-consumer
+  cloud:
+    loadbalancer:
+      retry:
+        enabled: true # 开启Spring Cloud的重试功能
+  user-service:
+    ribbon:
+      ConnectTimeout: 250 # Ribbon的连接超时时间
+      ReadTimeout: 1000 # Ribbon的数据读取超时时间
+      OkToRetryOnAllOperations: true # 是否对所有操作都进行重试
+      MaxAutoRetriesNextServer: 1 # 切换实例的重试次数
+      MaxAutoRetries: 1 # 对当前实例的重试次数
+
+mybatis:
+  type-aliases-package: com.zpark.model
+  configuration:
+    map-underscore-to-camel-case: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:10086/eureka,http://localhost:10087/eureka
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+
